@@ -6,7 +6,7 @@
       "@semantic-release/github",
       {
         "assets": [
-          { "path": "artifacts/swap_bulb-*" }
+          { "path": "artifacts/swapbulb-*" }
         ]
       }
     ]
