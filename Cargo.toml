@@ -1,0 +1,8 @@
+[package]
+name = "swap_bulb"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde_json = "1.0"
+tiny_http = "0.12.0"
