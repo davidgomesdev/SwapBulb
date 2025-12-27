@@ -1,0 +1,63 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          workflows:
+            - '.github/workflows/**'
+          code:
+            - 'src/**'
+            - 'Cargo.lock'
+            - 'Cargo.toml'
+            - 'Cross.toml'
+
+  check-and-test:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.code == 'true' || needs.detect-changes.outputs.workflows == 'true'}}
+    env:
+      CARGO_TERM_COLOR: always
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    steps:
+    - uses: rui314/setup-mold@v1
+
+    - uses: actions/checkout@v3
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        cache-on-failure: true
+
+    - name: 🧯 - Check for compile errors
+      run: cargo check
+
+    - name: 🧐 - Lint check
+      run: cargo clippy -- -D warnings
+
+    - name: 🔨 - Build
+      run: cargo build
+
+    - name: 🧪 - Run tests
+      run: cargo test --no-fail-fast
+      env:
+        DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        DISCORD_TESTER_TOKEN: ${{ secrets.DISCORD_TESTER_TOKEN }}
+        VOTING_EMOJIS: ${{ secrets.VOTING_EMOJIS }}
