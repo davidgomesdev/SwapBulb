@@ -16,18 +16,18 @@ jobs:
       matrix:
         build: [amd64, armhf, aarch64]
         include:
-        - build: amd64
-          os: ubuntu-latest
-          rust: stable
-          target: x86_64-unknown-linux-gnu
-        - build: armhf
-          os: ubuntu-latest
-          rust: stable
-          target: armv7-unknown-linux-gnueabihf
-        - build: aarch64
-          os: ubuntu-latest
-          rust: stable
-          target: aarch64-unknown-linux-gnu
+          - build: amd64
+            os: ubuntu-latest
+            rust: stable
+            target: x86_64-unknown-linux-gnu
+          - build: armhf
+            os: ubuntu-latest
+            rust: stable
+            target: armv7-unknown-linux-gnueabihf
+          - build: aarch64
+            os: ubuntu-latest
+            rust: stable
+            target: aarch64-unknown-linux-gnu
 
     env:
       CARGO_TERM_COLOR: always
@@ -38,31 +38,31 @@ jobs:
         working-directory: .
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: 🦀 - Install Rust
-      run: |
-        rustup set profile minimal
-        rustup toolchain install stable
-        rustup default stable
-        rustup override set stable
+      - name: 🦀 - Install Rust
+        run: |
+          rustup set profile minimal
+          rustup toolchain install stable
+          rustup default stable
+          rustup override set stable
 
-    - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2
 
-    - name: 🌱 - Install dependencies
-      run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: 🌱 - Install dependencies
+        run: cargo install cross --git https://github.com/cross-rs/cross
 
-    - name: 🔨 - Build
-      run: >
-        cross build --release --target ${{ matrix.target }} && \
-          mv target/**/release/swapbulb swapbulb-${{ matrix.build }}
+      - name: 🔨 - Build
+        run: >
+          cross build --release --target ${{ matrix.target }} && \
+            mv target/**/release/swap_bulb swap_bulb-${{ matrix.build }}
 
-    - name: 📦 - Copy artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: swapbulb-${{ matrix.build }}
-        path: swapbulb-${{ matrix.build }}
-        if-no-files-found: error
+      - name: 📦 - Copy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: swap_bulb-${{ matrix.build }}
+          path: swap_bulb-${{ matrix.build }}
+          if-no-files-found: error
 
   release:
     needs: [build-code]
@@ -71,23 +71,23 @@ jobs:
     if: github.ref_name == 'main' && github.event_name == 'push'
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: 📦 - Copy binary artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: artifacts/
-        merge-multiple: true
+      - name: 📦 - Copy binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true
 
-    - name: 🧐 - Display structure of downloaded artifacts
-      run: ls -R artifacts/
+      - name: 🧐 - Display structure of downloaded artifacts
+        run: ls -R artifacts/
 
-    - name: Semantic Release
-      uses: cycjimmy/semantic-release-action@v4
-      with:
-        branches: |
-          [
-            'main',
-          ]
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          branches: |
+            [
+              'main',
+            ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
