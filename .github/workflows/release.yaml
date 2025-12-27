@@ -55,13 +55,13 @@ jobs:
       - name: 🔨 - Build
         run: >
           cross build --release --target ${{ matrix.target }} && \
-            mv target/**/release/swap_bulb swap_bulb-${{ matrix.build }}
+            mv target/**/release/swap_bulb swapbulb-${{ matrix.build }}
 
       - name: 📦 - Copy artifact
         uses: actions/upload-artifact@v4
         with:
-          name: swap_bulb-${{ matrix.build }}
-          path: swap_bulb-${{ matrix.build }}
+          name: swapbulb-${{ matrix.build }}
+          path: swapbulb-${{ matrix.build }}
           if-no-files-found: error
 
   release:
